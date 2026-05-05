@@ -2,7 +2,9 @@
 window.Furigana = (function () {
   'use strict';
 
-  const DICT_URL = 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/';
+  // kuromoji.js の dict ローダーは絶対URLを正しく扱えない（プロトコル落ちの問題）
+  // ため、自サイトに同梱して相対パスで指定する
+  const DICT_URL = './dict/';
   const INIT_TIMEOUT_MS = 90 * 1000; // 90秒で諦める
   const UNKNOWN_GRADE = 99;
 
