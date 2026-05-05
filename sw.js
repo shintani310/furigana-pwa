@@ -2,7 +2,7 @@
 // 同一オリジンの静的ファイルのみキャッシュ。
 // 外部CDN（jsDelivrの辞書/ライブラリ）とCORSプロキシはSWを通さない。
 
-const SHELL_CACHE = 'fr-shell-v3';
+const SHELL_CACHE = 'fr-shell-v4';
 
 const SHELL_FILES = [
   './',

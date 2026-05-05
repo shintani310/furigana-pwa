@@ -2,13 +2,10 @@
 window.Furigana = (function () {
   'use strict';
 
-  // 辞書はjsDelivrから取得（CORS対応済み）
   const DICT_URL = 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/';
-
-  // 教育漢字外の漢字を表す番外学年（常にふりがな表示）
+  const INIT_TIMEOUT_MS = 90 * 1000; // 90秒で諦める
   const UNKNOWN_GRADE = 99;
 
-  // UMDビルドの差異を吸収
   function resolveCtor(globalObj) {
     if (!globalObj) return null;
     return globalObj.default || globalObj;
@@ -17,25 +14,62 @@ window.Furigana = (function () {
   let initPromise = null;
   let kuroshiroInst = null;
 
-  function init() {
-    if (initPromise) return initPromise;
-    const KuroshiroCtor = resolveCtor(window.Kuroshiro);
-    const AnalyzerCtor = resolveCtor(window.KuromojiAnalyzer);
-    if (!KuroshiroCtor || !AnalyzerCtor) {
-      return Promise.reject(new Error('Kuroshiro / KuromojiAnalyzer が読み込めていません'));
-    }
-    initPromise = (async () => {
+  function initInner() {
+    return new Promise(function (resolve, reject) {
+      const KuroshiroCtor = resolveCtor(window.Kuroshiro);
+      const AnalyzerCtor = resolveCtor(window.KuromojiAnalyzer);
+      console.log('[Furigana] globals check:', {
+        Kuroshiro: !!window.Kuroshiro,
+        KuromojiAnalyzer: !!window.KuromojiAnalyzer,
+        kuromoji: !!window.kuromoji,
+        Readability: typeof Readability !== 'undefined',
+      });
+      if (!KuroshiroCtor) {
+        return reject(new Error('Kuroshiro が読み込めていません（CDN取得失敗の可能性）'));
+      }
+      if (!AnalyzerCtor) {
+        return reject(new Error('KuromojiAnalyzer が読み込めていません（CDN取得失敗の可能性）'));
+      }
+
       console.log('[Furigana] init start, dictPath =', DICT_URL);
       const t0 = Date.now();
-      kuroshiroInst = new KuroshiroCtor();
+
+      const timer = setTimeout(function () {
+        reject(new Error(
+          'ふりがな辞書の読み込みに ' + (INIT_TIMEOUT_MS / 1000) + ' 秒以上かかりました。' +
+          '通信状況を確認してから再度お試しください。'
+        ));
+      }, INIT_TIMEOUT_MS);
+
       try {
-        await kuroshiroInst.init(new AnalyzerCtor({ dictPath: DICT_URL }));
-        console.log('[Furigana] init done in', ((Date.now() - t0) / 1000).toFixed(1), 's');
+        kuroshiroInst = new KuroshiroCtor();
+        kuroshiroInst
+          .init(new AnalyzerCtor({ dictPath: DICT_URL }))
+          .then(function () {
+            clearTimeout(timer);
+            console.log('[Furigana] init done in', ((Date.now() - t0) / 1000).toFixed(1), 's');
+            resolve();
+          })
+          .catch(function (e) {
+            clearTimeout(timer);
+            console.error('[Furigana] analyzer init failed:', e);
+            reject(e);
+          });
       } catch (e) {
-        console.error('[Furigana] init failed:', e);
-        throw e;
+        clearTimeout(timer);
+        console.error('[Furigana] sync exception:', e);
+        reject(e);
       }
-    })();
+    });
+  }
+
+  function init() {
+    if (initPromise) return initPromise;
+    initPromise = initInner().catch(function (e) {
+      // 失敗時は次回再試行できるよう promise を破棄
+      initPromise = null;
+      throw e;
+    });
     return initPromise;
   }
 
@@ -68,8 +102,6 @@ window.Furigana = (function () {
     return base;
   }
 
-  // ruby に data-max-grade を付与
-  // base text 内の漢字で最も学年が高い値（教育漢字外があれば UNKNOWN_GRADE）
   function annotateRuby(ruby, kanjiGrades) {
     const base = extractRubyBase(ruby);
     let maxGrade = 0;
@@ -98,7 +130,6 @@ window.Furigana = (function () {
         });
         const tmpl = document.createElement('template');
         tmpl.innerHTML = html;
-        // ふりがなが付いた断片内の各 ruby に学年マークを付ける
         tmpl.content.querySelectorAll('ruby').forEach(r => annotateRuby(r, kanjiGrades));
         node.replaceWith(tmpl.content);
       } catch (e) {
@@ -111,7 +142,6 @@ window.Furigana = (function () {
     }
   }
 
-  // 学年フィルタ: 削除せず class で表示制御（再切替可能）
   function applyGradeFilter(root, gradeLimit) {
     root.querySelectorAll('ruby').forEach(ruby => {
       const max = parseInt(ruby.dataset.maxGrade, 10) || UNKNOWN_GRADE;
