@@ -2,7 +2,7 @@
 // 同一オリジンの静的ファイルのみキャッシュ。
 // 外部CDN（jsDelivrのライブラリ）とCORSプロキシはSWを通さない。
 
-const SHELL_CACHE = 'fr-shell-v7';
+const SHELL_CACHE = 'fr-shell-v8';
 
 // install時にプリキャッシュするアプリシェル
 // 辞書ファイルは大きい(~17MB)のでここには入れず、初回利用時に遅延キャッシュする
@@ -16,6 +16,7 @@ const SHELL_FILES = [
   './js/viewer.js',
   './js/furigana.js',
   './js/extractor.js',
+  './js/fullcopy.js',
   './js/storage.js',
   './data/kanji-grades.json',
   './icons/icon-192.png',

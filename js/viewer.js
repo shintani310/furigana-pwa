@@ -4,6 +4,8 @@
 
   const DEFAULT_GRADE = 3;
   const KANJI_GRADES_URL = './data/kanji-grades.json';
+  const VALID_MODES = ['extract', 'fullcopy'];
+  const DEFAULT_MODE = 'extract';
 
   const els = {
     title: document.getElementById('title'),
@@ -14,6 +16,7 @@
     status: document.getElementById('status'),
     statusText: document.getElementById('status-text'),
     content: document.getElementById('content'),
+    iframe: document.getElementById('content-iframe'),
   };
 
   const params = new URLSearchParams(location.search);
@@ -22,9 +25,15 @@
     parseInt(params.get('grade'), 10) ||
     (window.Storage ? window.Storage.getGrade() : DEFAULT_GRADE)
   );
+  const initialMode = (function () {
+    const m = params.get('mode');
+    if (VALID_MODES.includes(m)) return m;
+    return window.Storage ? window.Storage.getMode() : DEFAULT_MODE;
+  })();
 
   let kanjiGrades = null;
   let currentGrade = initialGrade;
+  let currentMode = initialMode;
   let pageTitle = '';
 
   function clampGrade(g) {
@@ -58,8 +67,15 @@
     currentGrade = g;
     if (window.Storage) window.Storage.setGrade(g);
     updateGradeUI(g);
-    if (kanjiGrades && els.content && !els.content.hidden) {
-      window.Furigana.applyGradeFilter(els.content, g);
+    if (!kanjiGrades) return;
+    if (currentMode === 'extract') {
+      if (els.content && !els.content.hidden) {
+        window.Furigana.applyGradeFilter(els.content, g);
+      }
+    } else if (currentMode === 'fullcopy') {
+      if (els.iframe && !els.iframe.hidden) {
+        window.FullCopy.applyGrade(els.iframe, g);
+      }
     }
   }
 
@@ -95,6 +111,70 @@
     els.sourceLink.href = targetUrl;
   }
 
+  function progressMessage(p) {
+    if (!p) return 'ふりがなを付けています…';
+    if (p.phase === 'fetch') return 'ページを取得中…';
+    if (p.phase === 'parse') return 'ページを解析中…';
+    if (p.phase === 'render') return '表示を組み立て中…';
+    if (p.phase === 'furigana') {
+      const pct = p.total > 0 ? Math.round(100 * p.done / p.total) : 0;
+      return `ふりがなを付けています… ${pct}%`;
+    }
+    return '処理中…';
+  }
+
+  async function runExtractMode() {
+    setStatus('ページを取得中…');
+    const { title, container } = await window.Extractor.extractContent(targetUrl);
+    pageTitle = title || targetUrl;
+    document.title = `${pageTitle} - ふりがなリーダー`;
+    els.title.textContent = pageTitle;
+
+    if (window.Storage) {
+      window.Storage.addHistory({ url: targetUrl, title: pageTitle });
+      updateFavButton();
+    }
+
+    setStatus('ふりがなを準備中…（はじめて使うときは少し時間がかかります）');
+    await window.Furigana.init();
+
+    els.content.appendChild(container);
+    els.content.hidden = false;
+
+    setStatus('ふりがなを付けています… 0%');
+    await window.Furigana.addFuriganaToDOM(els.content, kanjiGrades, (done, total) => {
+      const pct = total > 0 ? Math.round(100 * done / total) : 100;
+      setStatus(`ふりがなを付けています… ${pct}%`);
+    });
+
+    window.Furigana.applyGradeFilter(els.content, currentGrade);
+  }
+
+  async function runFullCopyMode() {
+    setStatus('ふりがなを準備中…（はじめて使うときは少し時間がかかります）');
+    await window.Furigana.init();
+
+    setStatus('ページを取得中…');
+    els.iframe.hidden = false;
+
+    const { title } = await window.FullCopy.load(
+      targetUrl,
+      kanjiGrades,
+      currentGrade,
+      els.iframe,
+      (p) => setStatus(progressMessage(p))
+    );
+
+    pageTitle = title || targetUrl;
+    document.title = `${pageTitle} - ふりがなリーダー`;
+    els.title.textContent = pageTitle;
+
+    if (window.Storage) {
+      window.Storage.addHistory({ url: targetUrl, title: pageTitle });
+      updateFavButton();
+    }
+  }
+
   async function main() {
     if (!targetUrl) {
       setStatus('URLが指定されていません', { error: true });
@@ -106,35 +186,13 @@
 
     try {
       setStatus('準備中…');
-      const kanjiPromise = fetch(KANJI_GRADES_URL).then((r) => r.json());
+      kanjiGrades = await fetch(KANJI_GRADES_URL).then((r) => r.json());
 
-      setStatus('ページを取得中…');
-      const { title, container } = await window.Extractor.extractContent(targetUrl);
-      pageTitle = title || targetUrl;
-      document.title = `${pageTitle} - ふりがなリーダー`;
-      els.title.textContent = pageTitle;
-
-      // 取得成功した時点で履歴に追加（お気に入りボタンも反映）
-      if (window.Storage) {
-        window.Storage.addHistory({ url: targetUrl, title: pageTitle });
-        updateFavButton();
+      if (currentMode === 'fullcopy') {
+        await runFullCopyMode();
+      } else {
+        await runExtractMode();
       }
-
-      kanjiGrades = await kanjiPromise;
-
-      setStatus('ふりがなを準備中…（はじめて使うときは少し時間がかかります）');
-      await window.Furigana.init();
-
-      els.content.appendChild(container);
-      els.content.hidden = false;
-
-      setStatus('ふりがなを付けています… 0%');
-      await window.Furigana.addFuriganaToDOM(els.content, kanjiGrades, (done, total) => {
-        const pct = total > 0 ? Math.round(100 * done / total) : 100;
-        setStatus(`ふりがなを付けています… ${pct}%`);
-      });
-
-      window.Furigana.applyGradeFilter(els.content, currentGrade);
       setStatus(null);
     } catch (e) {
       console.error(e);

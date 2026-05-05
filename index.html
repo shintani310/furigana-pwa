@@ -34,6 +34,21 @@
     </section>
 
     <section class="card">
+      <h2 class="section-title">表示モード</h2>
+      <div class="mode-row" id="mode-row" role="radiogroup" aria-label="表示モード">
+        <button type="button" class="mode-btn" data-mode="extract" role="radio">
+          <span class="mode-title">📖 本文だけ</span>
+          <span class="mode-sub">広告を消して読みやすく</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="fullcopy" role="radio">
+          <span class="mode-title">🖼 そのまま</span>
+          <span class="mode-sub">レイアウトを保つ</span>
+        </button>
+      </div>
+      <p class="hint">「本文だけ」がおすすめ。表示が崩れるときは「そのまま」を試してください。</p>
+    </section>
+
+    <section class="card">
       <h2 class="section-title">URL</h2>
       <form id="url-form">
         <input

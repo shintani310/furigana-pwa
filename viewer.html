@@ -36,6 +36,13 @@
   </div>
 
   <article class="content" id="content" hidden></article>
+  <iframe
+    id="content-iframe"
+    class="content-iframe"
+    hidden
+    sandbox="allow-same-origin allow-scripts allow-popups"
+    referrerpolicy="no-referrer"
+    title="ふりがな付きページ"></iframe>
 
   <!-- 外部ライブラリ（jsDelivr CDN） -->
   <script src="https://cdn.jsdelivr.net/npm/@mozilla/readability@0.5.0/Readability.js"></script>
@@ -46,6 +53,7 @@
   <script src="./js/storage.js"></script>
   <script src="./js/furigana.js"></script>
   <script src="./js/extractor.js"></script>
+  <script src="./js/fullcopy.js"></script>
   <script src="./js/viewer.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

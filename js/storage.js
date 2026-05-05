@@ -3,11 +3,14 @@ window.Storage = (function () {
   'use strict';
 
   const KEY_GRADE = 'fr.grade';
+  const KEY_MODE = 'fr.mode';
   const KEY_HISTORY = 'fr.history';
   const KEY_FAVORITES = 'fr.favorites';
   const HISTORY_MAX = 30;
   const FAVORITES_MAX = 50;
   const DEFAULT_GRADE = 3;
+  const DEFAULT_MODE = 'extract'; // 'extract' | 'fullcopy'
+  const VALID_MODES = ['extract', 'fullcopy'];
 
   function readJson(key, fallback) {
     try {
@@ -36,6 +39,15 @@ window.Storage = (function () {
   function setGrade(g) {
     const c = Math.min(6, Math.max(1, parseInt(g, 10) || DEFAULT_GRADE));
     localStorage.setItem(KEY_GRADE, String(c));
+  }
+
+  // ---- 表示モード ----
+  function getMode() {
+    const v = localStorage.getItem(KEY_MODE);
+    return VALID_MODES.includes(v) ? v : DEFAULT_MODE;
+  }
+  function setMode(m) {
+    if (VALID_MODES.includes(m)) localStorage.setItem(KEY_MODE, m);
   }
 
   // ---- 共通: URLを正規化（同じURLを別物として記録しないため） ----
@@ -111,6 +123,8 @@ window.Storage = (function () {
   return {
     getGrade,
     setGrade,
+    getMode,
+    setMode,
     getHistory,
     addHistory,
     removeHistory,

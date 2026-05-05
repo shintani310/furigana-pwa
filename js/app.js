@@ -3,6 +3,7 @@
 
   const els = {
     gradeRow: document.getElementById('grade-row'),
+    modeRow: document.getElementById('mode-row'),
     form: document.getElementById('url-form'),
     urlInput: document.getElementById('url-input'),
     favCard: document.getElementById('favorites-card'),
@@ -20,6 +21,15 @@
     });
   }
 
+  function updateModeUI(m) {
+    if (!els.modeRow) return;
+    els.modeRow.querySelectorAll('.mode-btn').forEach((btn) => {
+      const isActive = btn.dataset.mode === m;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-checked', isActive ? 'true' : 'false');
+    });
+  }
+
   els.gradeRow.addEventListener('click', (e) => {
     const btn = e.target.closest('.grade-btn');
     if (!btn) return;
@@ -29,6 +39,16 @@
       updateGradeUI(g);
     }
   });
+
+  if (els.modeRow) {
+    els.modeRow.addEventListener('click', (e) => {
+      const btn = e.target.closest('.mode-btn');
+      if (!btn) return;
+      const m = btn.dataset.mode;
+      window.Storage.setMode(m);
+      updateModeUI(m);
+    });
+  }
 
   els.form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -44,7 +64,9 @@
       return;
     }
     const grade = window.Storage.getGrade();
-    location.href = `./viewer.html?url=${encodeURIComponent(target)}&grade=${grade}`;
+    const mode = window.Storage.getMode();
+    location.href =
+      `./viewer.html?url=${encodeURIComponent(target)}&grade=${grade}&mode=${mode}`;
   });
 
   // ---- 履歴・お気に入り表示 ----
@@ -59,20 +81,14 @@
   }
 
   function buildLinkItem(entry, opts) {
-    // <li class="link-item">
-    //   <a class="link-main" href="viewer.html?...">
-    //     <span class="link-title">title</span>
-    //     <span class="link-sub">host/path</span>
-    //   </a>
-    //   <button class="link-action">⭐ / 🗑</button>
-    // </li>
     const grade = window.Storage.getGrade();
+    const mode = window.Storage.getMode();
     const li = document.createElement('li');
     li.className = 'link-item';
 
     const a = document.createElement('a');
     a.className = 'link-main';
-    a.href = `./viewer.html?url=${encodeURIComponent(entry.url)}&grade=${grade}`;
+    a.href = `./viewer.html?url=${encodeURIComponent(entry.url)}&grade=${grade}&mode=${mode}`;
     const title = document.createElement('span');
     title.className = 'link-title';
     title.textContent = entry.title || entry.url;
@@ -99,7 +115,6 @@
   }
 
   function renderLists() {
-    // お気に入り
     const favs = window.Storage.getFavorites();
     els.favList.innerHTML = '';
     favs.forEach((entry) => {
@@ -113,7 +128,6 @@
     });
     els.favCard.hidden = favs.length === 0;
 
-    // 履歴
     const hist = window.Storage.getHistory();
     els.histList.innerHTML = '';
     hist.forEach((entry) => {
@@ -137,7 +151,7 @@
     }
   });
 
-  // 初期化
   updateGradeUI(window.Storage.getGrade());
+  updateModeUI(window.Storage.getMode());
   renderLists();
 })();
