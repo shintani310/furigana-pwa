@@ -1,0 +1,385 @@
+:root {
+  --bg: #fffde7;
+  --card-bg: #ffffff;
+  --text: #222;
+  --muted: #666;
+  --accent: #f57c00;
+  --accent-bg: #fff3e0;
+  --border: #e0d8c8;
+  --error: #c62828;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 17px; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  min-height: 100vh;
+  padding: 0;
+}
+
+.app-header {
+  background: var(--accent);
+  color: white;
+  padding: 16px 20px;
+  text-align: center;
+}
+.app-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.app-header .subtitle {
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+  opacity: 0.95;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.section-title {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.hint {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.grade-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.grade-btn {
+  flex: 1 1 0;
+  min-width: 56px;
+  min-height: 52px;
+  padding: 8px 4px;
+  font-size: 1rem;
+  font-weight: 700;
+  background: white;
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.grade-btn:hover { background: var(--accent-bg); }
+.grade-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+#url-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+input[type="url"] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  color: var(--text);
+}
+input[type="url"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.primary-btn {
+  width: 100%;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 16px;
+  min-height: 56px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.primary-btn:active { opacity: 0.85; }
+.primary-btn:disabled {
+  background: #bbb;
+  cursor: not-allowed;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 16px;
+  color: var(--muted);
+}
+
+/* === viewer.html 専用 === */
+.viewer-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: white;
+  padding: 12px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.viewer-header .icon-btn {
+  background: rgba(255,255,255,0.18);
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.viewer-header .icon-btn:active { opacity: 0.7; }
+.viewer-header .title {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+.viewer-header .icon-btn a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.viewer-grade-row {
+  background: white;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 64px;
+  z-index: 9;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+}
+.viewer-grade-row .grade-btn {
+  flex: 0 0 auto;
+  min-width: 52px;
+  min-height: 44px;
+  padding: 6px 10px;
+  font-size: 0.95rem;
+}
+
+.status {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--muted);
+}
+.status.error { color: var(--error); }
+.status .spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.content {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px 20px 60px;
+  font-size: 1.15rem;
+  line-height: 2.1;
+  word-wrap: break-word;
+}
+.content h1, .content h2, .content h3 {
+  line-height: 1.5;
+  margin-top: 1.4em;
+  margin-bottom: 0.6em;
+}
+.content h1 { font-size: 1.4rem; }
+.content h2 { font-size: 1.25rem; }
+.content h3 { font-size: 1.1rem; }
+.content p { margin: 1em 0; }
+.content img { max-width: 100%; height: auto; border-radius: 8px; }
+.content a { color: #1565c0; word-break: break-all; }
+.content ul, .content ol { padding-left: 1.4em; }
+.content table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  max-width: 100%;
+}
+.content th, .content td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+}
+.content pre, .content code {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.content blockquote {
+  border-left: 4px solid var(--accent);
+  padding-left: 12px;
+  margin: 1em 0;
+  color: var(--muted);
+}
+
+/* === 履歴・お気に入りリスト === */
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.text-btn {
+  font-size: 0.85rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 6px 10px;
+  border-radius: 6px;
+  min-height: 32px;
+  cursor: pointer;
+}
+.text-btn:hover { background: var(--accent-bg); }
+
+.link-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.link-item {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  border-top: 1px solid var(--border);
+}
+.link-item:first-child { border-top: none; }
+
+.link-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 8px;
+  text-decoration: none;
+  color: var(--text);
+  min-height: 56px;
+  justify-content: center;
+  -webkit-tap-highlight-color: rgba(245,124,0,0.15);
+  border-radius: 6px;
+}
+.link-main:active { background: var(--accent-bg); }
+.link-title {
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+.link-sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 2px;
+  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.link-action {
+  flex: 0 0 auto;
+  width: 44px;
+  min-height: 44px;
+  align-self: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--muted);
+  -webkit-tap-highlight-color: transparent;
+}
+.link-action:hover { background: var(--accent-bg); border-color: var(--border); }
+
+/* お気に入りボタン (viewerヘッダ内) */
+#fav-btn.is-fav {
+  background: rgba(255, 235, 100, 0.95);
+  color: #f57c00;
+}
+
+/* viewerヘッダのアンカーアイコン */
+.icon-btn-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.18);
+  color: white;
+  font-size: 1.1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.icon-btn-link:active { opacity: 0.7; }
+
+/* ふりがな表示 */
+ruby {
+  ruby-position: over;
+  ruby-align: center;
+}
+rt {
+  font-size: 0.55em;
+  color: var(--muted);
+  font-weight: normal;
+  letter-spacing: 0;
+}
+/* 学習済み漢字: rt/rp を非表示にして通常テキスト風に */
+ruby.learned rt,
+ruby.learned rp {
+  display: none;
+}

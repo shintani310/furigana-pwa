@@ -1,0 +1,7 @@
+name = "furigana-proxy"
+main = "index.js"
+compatibility_date = "2024-12-01"
+
+# 任意: ログを残したい場合は有効化
+# [observability]
+# enabled = true

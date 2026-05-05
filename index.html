@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ふりがなリーダー</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#f57c00">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ふりがな">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>📚 ふりがなリーダー</h1>
+    <p class="subtitle">読みたいページのURLを入れてね</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2 class="section-title">学年</h2>
+      <div class="grade-row" id="grade-row" role="radiogroup" aria-label="学年">
+        <button type="button" class="grade-btn" data-grade="1" role="radio">1年</button>
+        <button type="button" class="grade-btn" data-grade="2" role="radio">2年</button>
+        <button type="button" class="grade-btn" data-grade="3" role="radio">3年</button>
+        <button type="button" class="grade-btn" data-grade="4" role="radio">4年</button>
+        <button type="button" class="grade-btn" data-grade="5" role="radio">5年</button>
+        <button type="button" class="grade-btn" data-grade="6" role="radio">6年</button>
+      </div>
+      <p class="hint">えらんだ学年までにならう漢字には、ふりがなをつけません。</p>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">URL</h2>
+      <form id="url-form">
+        <input
+          type="url"
+          id="url-input"
+          name="url"
+          placeholder="https://example.com/..."
+          autocomplete="url"
+          inputmode="url"
+          required>
+        <button type="submit" class="primary-btn">
+          ふりがなをつけて読む ▶
+        </button>
+      </form>
+    </section>
+
+    <section class="card" id="favorites-card" hidden>
+      <h2 class="section-title">⭐ お気に入り</h2>
+      <ul class="link-list" id="favorites-list"></ul>
+    </section>
+
+    <section class="card" id="history-card" hidden>
+      <div class="card-header-row">
+        <h2 class="section-title">🕐 さいきん見たページ</h2>
+        <button type="button" class="text-btn" id="clear-history-btn" hidden>履歴を消す</button>
+      </div>
+      <ul class="link-list" id="history-list"></ul>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <small>家族用ふりがなリーダー</small>
+  </footer>
+
+  <script src="./js/storage.js"></script>
+  <script src="./js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((e) => console.warn('SW register failed:', e));
+      });
+    }
+  </script>
+</body>
+</html>

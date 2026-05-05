@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:8080/)",
+      "Bash(curl -s http://localhost:8080/)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} size=%{size_download}\\\\n\" http://localhost:8080/data/kanji-grades.json)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:8080/js/app.js)",
+      "Bash(wrangler deployments *)",
+      "Bash(wrangler whoami *)",
+      "Bash(wrangler deploy *)",
+      "Bash(curl -sf -H \"Origin: http://localhost:8080\" -o /tmp/worker_test_response.html -w \"HTTP %{http_code} | size=%{size_download} | time=%{time_total}s\\\\n\" \"https://furigana-proxy.furigana-reader.workers.dev/?url=https%3A%2F%2Fja.wikipedia.org%2Fwiki%2F%25E5%25B7%259D\")",
+      "Bash(curl -sI -H \"Origin: http://localhost:8080\" \"https://furigana-proxy.furigana-reader.workers.dev/?url=https%3A%2F%2Fja.wikipedia.org%2Fwiki%2F%25E5%25B7%259D\")",
+      "Read(//tmp/**)",
+      "Bash(python3 -c \"import PIL; print\\('Pillow', PIL.__version__\\)\")",
+      "Read(//System/Library/AssetsV2/**)",
+      "Bash(python3 /tmp/generate_icons.py)",
+      "Bash(python3 -c \"from PIL import Image; import os; d='/Users/shintanitakaaki/Desktop/ふりがなPWA_AIワークスペース/icons'; [print\\(f, Image.open\\(os.path.join\\(d,f\\)\\).size, Image.open\\(os.path.join\\(d,f\\)\\).mode\\) for f in sorted\\(os.listdir\\(d\\)\\)]\")",
+      "Bash(curl -s -o /dev/null -w \"manifest: HTTP %{http_code}\\\\n\" http://localhost:8080/manifest.webmanifest)",
+      "Bash(curl -s -o /dev/null -w \"sw.js: HTTP %{http_code}\\\\n\" http://localhost:8080/sw.js)",
+      "Bash(curl -s -o /dev/null -w \"storage.js: HTTP %{http_code}\\\\n\" http://localhost:8080/js/storage.js)",
+      "Bash(curl -s -o /dev/null -w \"icon-192: HTTP %{http_code} size=%{size_download}\\\\n\" http://localhost:8080/icons/icon-192.png)",
+      "Bash(curl -s -o /dev/null -w \"icon-512: HTTP %{http_code} size=%{size_download}\\\\n\" http://localhost:8080/icons/icon-512.png)"
+    ],
+    "additionalDirectories": [
+      "/tmp",
+      "/private/tmp"
+    ]
+  }
+}

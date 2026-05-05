@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>読み込み中… - ふりがなリーダー</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#f57c00">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ふりがな">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <header class="viewer-header">
+    <button type="button" class="icon-btn" id="back-btn" aria-label="戻る">←</button>
+    <h1 class="title" id="title">読み込み中…</h1>
+    <button type="button" class="icon-btn" id="fav-btn" aria-label="お気に入りに追加">☆</button>
+    <a class="icon-btn icon-btn-link" id="source-link" href="#" target="_blank" rel="noopener noreferrer" aria-label="元ページを開く">🔗</a>
+  </header>
+
+  <nav class="viewer-grade-row" id="grade-row" role="radiogroup" aria-label="学年">
+    <button type="button" class="grade-btn" data-grade="1" role="radio">1年</button>
+    <button type="button" class="grade-btn" data-grade="2" role="radio">2年</button>
+    <button type="button" class="grade-btn" data-grade="3" role="radio">3年</button>
+    <button type="button" class="grade-btn" data-grade="4" role="radio">4年</button>
+    <button type="button" class="grade-btn" data-grade="5" role="radio">5年</button>
+    <button type="button" class="grade-btn" data-grade="6" role="radio">6年</button>
+  </nav>
+
+  <div class="status" id="status">
+    <span class="spinner"></span>
+    <span id="status-text">準備中…</span>
+  </div>
+
+  <article class="content" id="content" hidden></article>
+
+  <!-- 外部ライブラリ（jsDelivr CDN） -->
+  <script src="https://cdn.jsdelivr.net/npm/@mozilla/readability@0.5.0/Readability.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/kuroshiro@1.2.0/dist/kuroshiro.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/kuroshiro-analyzer-kuromoji@1.1.0/dist/kuroshiro-analyzer-kuromoji.min.js"></script>
+
+  <!-- アプリJS -->
+  <script src="./js/storage.js"></script>
+  <script src="./js/furigana.js"></script>
+  <script src="./js/extractor.js"></script>
+  <script src="./js/viewer.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((e) => console.warn('SW register failed:', e));
+      });
+    }
+  </script>
+</body>
+</html>
