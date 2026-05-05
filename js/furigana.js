@@ -25,8 +25,16 @@ window.Furigana = (function () {
       return Promise.reject(new Error('Kuroshiro / KuromojiAnalyzer が読み込めていません'));
     }
     initPromise = (async () => {
+      console.log('[Furigana] init start, dictPath =', DICT_URL);
+      const t0 = Date.now();
       kuroshiroInst = new KuroshiroCtor();
-      await kuroshiroInst.init(new AnalyzerCtor({ dictPath: DICT_URL }));
+      try {
+        await kuroshiroInst.init(new AnalyzerCtor({ dictPath: DICT_URL }));
+        console.log('[Furigana] init done in', ((Date.now() - t0) / 1000).toFixed(1), 's');
+      } catch (e) {
+        console.error('[Furigana] init failed:', e);
+        throw e;
+      }
     })();
     return initPromise;
   }
