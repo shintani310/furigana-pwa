@@ -44,6 +44,71 @@ window.Extractor = (function () {
     });
   }
 
+  // 遅延読み込み属性を src に昇格させる
+  // 多くのサイトが <img src="placeholder.gif" data-src="本物.jpg" loading="lazy"> 形式
+  // Readability は data-* を認識しないので、事前に書き換える必要がある
+  function unlazyImages(root) {
+    const LAZY_SRC_ATTRS = [
+      'data-src', 'data-lazy-src', 'data-original', 'data-original-src',
+      'data-actual-src', 'data-defer-src', 'data-echo', 'data-img-src',
+    ];
+    const LAZY_SRCSET_ATTRS = [
+      'data-srcset', 'data-lazy-srcset', 'data-original-srcset',
+    ];
+
+    root.querySelectorAll('img, source').forEach(el => {
+      // src の昇格
+      const currentSrc = el.getAttribute('src') || '';
+      const isPlaceholder = !currentSrc ||
+        /^data:/.test(currentSrc) ||
+        /placeholder|blank|spacer|1x1|loading/i.test(currentSrc);
+      for (const attr of LAZY_SRC_ATTRS) {
+        const v = el.getAttribute(attr);
+        if (v && (isPlaceholder || !el.getAttribute('src'))) {
+          el.setAttribute('src', v);
+          break;
+        }
+      }
+      // srcset の昇格
+      if (!el.getAttribute('srcset')) {
+        for (const attr of LAZY_SRCSET_ATTRS) {
+          const v = el.getAttribute(attr);
+          if (v) {
+            el.setAttribute('srcset', v);
+            break;
+          }
+        }
+      }
+      // loading="lazy" は描画後すぐ読みに行きたいので外す
+      if (el.getAttribute('loading') === 'lazy') {
+        el.removeAttribute('loading');
+      }
+      // ホットリンク防止対策: Referer を送らない
+      if (el.tagName === 'IMG' && !el.hasAttribute('referrerpolicy')) {
+        el.setAttribute('referrerpolicy', 'no-referrer');
+      }
+    });
+
+    // <noscript> 内に本物の <img> が入っているパターン（はてなブログ等）
+    root.querySelectorAll('noscript').forEach(ns => {
+      const html = ns.textContent || ns.innerHTML;
+      if (/<img\s/i.test(html)) {
+        const tmpl = document.createElement('template');
+        tmpl.innerHTML = html;
+        const realImg = tmpl.content.querySelector('img');
+        if (realImg) {
+          const prev = ns.previousElementSibling;
+          // 直前の img がプレースホルダ風なら置き換え
+          if (prev && prev.tagName === 'IMG') {
+            prev.replaceWith(realImg.cloneNode(true));
+          } else {
+            ns.replaceWith(realImg.cloneNode(true));
+          }
+        }
+      }
+    });
+  }
+
   // 本文抽出: { title, container } を返す
   async function extractContent(targetUrl) {
     const html = await fetchHtml(targetUrl);
@@ -59,6 +124,10 @@ window.Extractor = (function () {
     if (typeof Readability === 'undefined') {
       throw new Error('Readability ライブラリが読み込めていません');
     }
+
+    // Readability に渡す前に lazy 画像を src に昇格させる
+    // （Readability は data-* 属性を認識しないため）
+    unlazyImages(doc);
 
     // Readability は DOM を破壊するので clone を渡すのが安全
     const docClone = doc.cloneNode(true);
@@ -78,6 +147,8 @@ window.Extractor = (function () {
       title = doc.title || targetUrl;
     }
 
+    // Readability が data-* を落としている可能性があるので念のため再実行
+    unlazyImages(container);
     absolutizeUrls(container, targetUrl);
 
     // 危険な要素を除去
